@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model SOP {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  tasks       Task[]
+  resources   Resource[]
+  totalCost   Float       @default(0)
+  status      String      @default("draft") // draft, in_progress, completed
+  userId      String      // Clerk user ID
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  status      String    @default("pending") // pending, in_progress, completed
+  cost        Float     @default(0)
+  sop         SOP       @relation(fields: [sopId], references: [id], onDelete: Cascade)
+  sopId       String
+  resources   Resource[]
+}
+
+model Resource {
+  id          String    @id @default(cuid())
+  name        String
+  type        String    // human, tool, material
+  cost        Float
+  quantity    Int       @default(1)
+  sop         SOP       @relation(fields: [sopId], references: [id], onDelete: Cascade)
+  sopId       String
+  tasks       Task[]
+}
